@@ -43,6 +43,8 @@ def genereer_ai_analyse(ticker, _rij_data, _profiel, _feedback=None):
         "P/B Ratio": f"{val:.2f}" if pd.notna(val := _rij_data.get('P/B Ratio')) else "N/B",
         "Debt/Equity": f"{val:.2f}" if pd.notna(val := _rij_data.get('Debt/Equity')) else "N/B",
         "Winstmarge": f"{val:.2%}" if pd.notna(val := _rij_data.get('Winstmarge %')) else "N/B",
+        "Prestatie 1j": f"{val:+.2%}" if pd.notna(val := _rij_data.get('Prestatie 1j')) else "N/B",
+        "Prestatie S&P500 1j": f"{val:+.2%}" if pd.notna(val := _rij_data.get('Prestatie S&P500 1j')) else "N/B",
         "Return on Equity": f"{val:.2%}" if pd.notna(val := _rij_data.get('Return on Equity')) else "N/B",
         "RSI (14d)": f"{val:.2f}" if pd.notna(val := _rij_data.get('RSI')) else "N/B",
         "Trend (Koers vs 50d & 200d MA)": "Positief" if _rij_data.get('Huidige koers (EUR)', 0) > _rij_data.get('50d MA', 0) > _rij_data.get('200d MA', 0) else "Neutraal/Negatief"
@@ -74,6 +76,9 @@ Structureer je antwoord in het Nederlands met de volgende secties, gebruikmakend
 ### Executive Summary
 *   Geef een zeer beknopte samenvatting (2-3 zinnen) van de investeringscase voor **deze specifieke belegger**.
 
+### Scorekaart
+*   Geef een score op 10 voor **Waardering**, **Kwaliteit (Moat)**, en **Momentum**. Geef per score een ultrakorte (1 zin) onderbouwing.
+
 ### Bedrijfsmodel & Strategie
 *   **Kernactiviteit:** Beschrijf de belangrijkste activiteiten van het bedrijf en hoe het inkomsten genereert.
 *   **Strategie:** Wat is de uitgesproken strategie van het management voor toekomstige groei?
@@ -98,6 +103,9 @@ Structureer je antwoord in het Nederlands met de volgende secties, gebruikmakend
 *   **Synthese:** Verbind de kwalitatieve analyse (bedrijf, markt, risico's) met de kwantitatieve data. Is de huidige waardering (P/E, etc.) gerechtvaardigd gezien de groeivooruitzichten en risico's?
 *   **Validatie Regelmotor:** Reflecteer op het advies van de regelmotor ("{huidig_advies}"). Ondersteunt jouw diepgaande analyse dit advies, of zie je redenen om ervan af te wijken? Leg uit waarom.
 *   **Finale Aanbeveling:** Geef een afsluitende, gewogen aanbeveling (bv. Kopen, Houden, Verkopen, Overwegen) specifiek voor de belegger met het gegeven profiel. Onderbouw dit kort en krachtig.
+
+### Kritische Zelfreflectie
+*   Identificeer de grootste onzekerheid of het zwakste punt in je eigen analyse hierboven. Welke informatie zou je analyse significant kunnen veranderen?
 
 {feedback_tekst}
 """
