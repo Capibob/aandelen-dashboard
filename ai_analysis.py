@@ -8,7 +8,10 @@ from utils import format_euro
 from data_processing import get_all_ticker_info
 
 try:
-    api_key = st.secrets["GEMINI_API_KEY"]
+    # De API key moet expliciet naar een string worden geconverteerd.
+    # st.secrets geeft een speciaal object terug, geen pure string, wat een TypeError kan veroorzaken
+    # in de onderliggende gRPC-bibliotheek.
+    api_key = str(st.secrets["GEMINI_API_KEY"])
     genai.configure(api_key=api_key)
     AI_IS_CONFIGURED = True
 except (KeyError, FileNotFoundError):
