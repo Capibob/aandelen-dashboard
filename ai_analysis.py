@@ -137,9 +137,15 @@ def genereer_simpele_ai_analyse(ticker):
     # --- Basis data verwerken ---
     bedrijfsnaam = info.get('shortName', ticker)
     sector = info.get('sector', 'N/B')
-    samenvatting = info.get('longBusinessSummary',
-                            'Geen samenvatting beschikbaar.')
+    samenvatting_raw = info.get('longBusinessSummary', 'Geen samenvatting beschikbaar.')
 
+    # --- NIEUW: Beperk de lengte van de samenvatting om timeouts te voorkomen ---
+    # Een te lange 'longBusinessSummary' kan de API-call vertragen en een 504-fout veroorzaken.
+    max_len = 1500
+    if len(samenvatting_raw) > max_len:
+        samenvatting = samenvatting_raw[:max_len] + "..."
+    else:
+        samenvatting = samenvatting_raw
     # --- Prompt bouwen ---
     model = genai.GenerativeModel("gemini-1.5-flash")
     prompt = f"""
