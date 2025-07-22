@@ -18,18 +18,20 @@ except (KeyError, FileNotFoundError):
     AI_IS_CONFIGURED = False
 
 
-@st.cache_data(show_spinner=False)
+# De @st.cache_data decorator wordt verwijderd om streaming mogelijk te maken.
+# Caching wordt nu afgehandeld op de pagina zelf met st.session_state.
 def genereer_ai_analyse(ticker, _rij_data, _profiel, _feedback=None):
     """
     Genereert een geavanceerde, context-bewuste analyse van een aandeel met Google Gemini.
     Deze functie is nu "slimmer" omdat het de volledige data, het gebruikersprofiel en
     het advies van de regelmotor meekrijgt.
 
-    De 'ticker' parameter wordt expliciet meegegeven om de Streamlit cache correct te laten werken,
-    zelfs als de dictionary '_rij_data' complex is.
+    Deze functie retourneert nu een generator die de tekst chunk-voor-chunk streamt,
+    wat een directe weergave in de UI mogelijk maakt.
     """
     if not AI_IS_CONFIGURED:
-        return "Fout: Gemini AI is niet geconfigureerd. Voeg je `GEMINI_API_KEY` toe aan het `secrets.toml` bestand."
+        yield "Fout: Gemini AI is niet geconfigureerd. Voeg je `GEMINI_API_KEY` toe aan het `secrets.toml` bestand."
+        return
 
     # --- 1. Verzamel alle benodigde data uit de input ---
     bedrijfsnaam = _rij_data.get("Naam", ticker)
@@ -115,12 +117,15 @@ Structureer je antwoord in het Nederlands met de volgende secties, gebruikmakend
 
     # Genereer de AI-inhoud
     try:
-        response = model.generate_content(prompt)
-        return response.text
+        # Gebruik stream=True om een generator terug te krijgen
+        response = model.generate_content(prompt, stream=True)
+        for chunk in response:
+            if chunk.text:
+                yield chunk.text
     except Exception as e:
         logging.error(
             f"Fout bij het aanroepen van de Gemini API voor {ticker}: {e}")
-        return f"Er is een fout opgetreden bij het genereren van de AI-analyse: {e}"
+        yield f"### Fout\n\nEr is een onverwachte fout opgetreden bij het genereren van de AI-analyse: `{e}`"
 
 
 @st.cache_data(show_spinner=False)
