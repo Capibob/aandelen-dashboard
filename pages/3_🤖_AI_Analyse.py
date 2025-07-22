@@ -1,4 +1,5 @@
 import streamlit as st
+import plotly.graph_objects as go
 import pandas as pd
 
 # Importeer de benodigde functies uit je project
@@ -26,7 +27,7 @@ st.markdown("Voer een ticker-symbool in om een diepgaande, gecombineerde kwantit
 
 if not AI_IS_CONFIGURED:
     st.error("De AI-analyse functie is niet beschikbaar. Configureer je Gemini API sleutel in `secrets.toml`.")
-    st.code("[GEMINI_API_KEY]\n\"YOUR_API_KEY_HERE\"", language="toml")
+    st.code('[GEMINI_API_KEY]\nkey = "YOUR_API_KEY_HERE"', language="toml")
     st.stop()
 
 # --- Input sectie ---
@@ -123,6 +124,25 @@ if st.session_state.analyse_data is not None:
     col3.metric("Potentieel", f"{rij_data.get('Potentieel %', 0):.2%}" if pd.notna(
         rij_data.get('Potentieel %')) else 'N/B')
     col4.metric("Regelmotor Advies", rij_data.get('Advies', 'N/B'))
+
+    # --- NIEUW: Toon de koersgrafiek ---
+    hist_df = get_historische_data(rij_data.get('Ticker'))
+    if not hist_df.empty:
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=hist_df.index, y=hist_df['Close'], mode='lines', name='Koers', line=dict(color='royalblue')))
+        # Voeg voortschrijdende gemiddelden toe als ze bestaan in de data
+        if '50d MA' in rij_data and pd.notna(rij_data['50d MA']):
+             fig.add_trace(go.Scatter(x=hist_df.index, y=hist_df['Close'].rolling(window=50).mean(), mode='lines', name='50d MA', line=dict(color='orange', dash='dash')))
+        if '200d MA' in rij_data and pd.notna(rij_data['200d MA']):
+             fig.add_trace(go.Scatter(x=hist_df.index, y=hist_df['Close'].rolling(window=200).mean(), mode='lines', name='200d MA', line=dict(color='red', dash='dash')))
+
+        fig.update_layout(
+            title=f'Historische Koers en Voortschrijdende Gemiddelden voor {rij_data.get("Naam")}',
+            xaxis_title=None,
+            yaxis_title='Koers (EUR)',
+            legend_title='Legenda'
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
     # --- NIEUW: Toon de details van de adviesmotor ---
     advies_details = rij_data.get('advies_details')
