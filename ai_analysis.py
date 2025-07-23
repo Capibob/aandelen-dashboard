@@ -18,6 +18,15 @@ except (KeyError, FileNotFoundError):
     AI_IS_CONFIGURED = False
 
 
+def _format_metric(value, format_spec):
+    """Helper to format a metric, returning 'N/B' for null values."""
+    if pd.isna(value):
+        return "N/B"
+    try:
+        return f"{value:{format_spec}}"
+    except (ValueError, TypeError):
+        return "N/B"
+
 # De @st.cache_data decorator wordt verwijderd om streaming mogelijk te maken.
 # Caching wordt nu afgehandeld op de pagina zelf met st.session_state.
 def genereer_ai_analyse(ticker, _rij_data, _profiel, _feedback=None):
@@ -39,19 +48,18 @@ def genereer_ai_analyse(ticker, _rij_data, _profiel, _feedback=None):
 
     # Formatteer de kwantitatieve data voor de prompt
     kwantitatieve_data = {
-        "Huidige koers": format_euro(_rij_data.get('Huidige koers (EUR)')),
-        "Analist Koersdoel": format_euro(_rij_data.get('Analist Koersdoel (EUR)')),
-        "Potentieel": f"{_rij_data.get('Potentieel %', 0):.2%}",
-        "Rendement (in portefeuille)": f"{_rij_data.get('Rendement %', 0):.2%}",
-        # Gebruik een check om te voorkomen dat we proberen 'None' of 'N/B' te formatteren.
-        "P/E Ratio": f"{val:.2f}" if pd.notna(val := _rij_data.get('P/E Ratio')) else "N/B",
-        "P/B Ratio": f"{val:.2f}" if pd.notna(val := _rij_data.get('P/B Ratio')) else "N/B",
-        "Debt/Equity": f"{val:.2f}" if pd.notna(val := _rij_data.get('Debt/Equity')) else "N/B",
-        "Winstmarge": f"{val:.2%}" if pd.notna(val := _rij_data.get('Winstmarge %')) else "N/B",
-        "Prestatie 1j": f"{val:+.2%}" if pd.notna(val := _rij_data.get('Prestatie 1j')) else "N/B",
-        "Prestatie S&P500 1j": f"{val:+.2%}" if pd.notna(val := _rij_data.get('Prestatie S&P500 1j')) else "N/B",
-        "Return on Equity": f"{val:.2%}" if pd.notna(val := _rij_data.get('Return on Equity')) else "N/B",
-        "RSI (14d)": f"{val:.2f}" if pd.notna(val := _rij_data.get('RSI')) else "N/B",
+        "Huidige koers": format_euro(_rij_data.get("Huidige koers (EUR)")),
+        "Analist Koersdoel": format_euro(_rij_data.get("Analist Koersdoel (EUR)")),
+        "Potentieel": _format_metric(_rij_data.get("Potentieel %"), ".2%"),
+        "Rendement (in portefeuille)": _format_metric(_rij_data.get("Rendement %"), ".2%"),
+        "P/E Ratio": _format_metric(_rij_data.get("P/E Ratio"), ".2f"),
+        "P/B Ratio": _format_metric(_rij_data.get("P/B Ratio"), ".2f"),
+        "Debt/Equity": _format_metric(_rij_data.get("Debt/Equity"), ".2f"),
+        "Winstmarge": _format_metric(_rij_data.get("Winstmarge %"), ".2%"),
+        "Prestatie 1j": _format_metric(_rij_data.get("Prestatie 1j"), "+.2%"),
+        "Prestatie S&P500 1j": _format_metric(_rij_data.get("Prestatie S&P500 1j"), "+.2%"),
+        "Return on Equity": _format_metric(_rij_data.get("Return on Equity"), ".2%"),
+        "RSI (14d)": _format_metric(_rij_data.get("RSI"), ".2f"),
         "Trend (Koers vs 50d & 200d MA)": "Positief" if _rij_data.get('Huidige koers (EUR)', 0) > _rij_data.get('50d MA', 0) > _rij_data.get('200d MA', 0) else "Neutraal/Negatief"
     }
     # Maak een nette string van de kwantitatieve data
