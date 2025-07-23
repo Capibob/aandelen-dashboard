@@ -183,7 +183,7 @@ if st.session_state.analyse_data is not None:
                 # robuustere manier om data door te geven aan een gecachte functie, omdat
                 # dictionaries betrouwbaarder worden "gehasht" door Streamlit dan pandas objecten.
                 # We geven de ticker expliciet mee als eerste argument om de cache te garanderen.
-                analyse_tekst = genereer_ai_analyse(rij_data.get('Ticker'),
-                                                    rij_data.to_dict(), mijn_profiel, feedback)
-                st.write_stream("---")
+                analyse_tekst = genereer_ai_analyse(rij_data.get(
+                    'Ticker'), rij_data.to_dict(), mijn_profiel, feedback)
+                st.markdown("---")
                 st.write_stream(analyse_tekst)
