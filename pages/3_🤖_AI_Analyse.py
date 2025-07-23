@@ -129,12 +129,15 @@ if st.session_state.analyse_data is not None:
     hist_df = get_historische_data(rij_data.get('Ticker'))
     if not hist_df.empty:
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=hist_df.index, y=hist_df['Close'], mode='lines', name='Koers', line=dict(color='royalblue')))
+        fig.add_trace(go.Scatter(
+            x=hist_df.index, y=hist_df['Close'], mode='lines', name='Koers', line=dict(color='royalblue')))
         # Voeg voortschrijdende gemiddelden toe als ze bestaan in de data
         if '50d MA' in rij_data and pd.notna(rij_data['50d MA']):
-             fig.add_trace(go.Scatter(x=hist_df.index, y=hist_df['Close'].rolling(window=50).mean(), mode='lines', name='50d MA', line=dict(color='orange', dash='dash')))
+            fig.add_trace(go.Scatter(x=hist_df.index, y=hist_df['Close'].rolling(window=50).mean(
+            ), mode='lines', name='50d MA', line=dict(color='orange', dash='dash')))
         if '200d MA' in rij_data and pd.notna(rij_data['200d MA']):
-             fig.add_trace(go.Scatter(x=hist_df.index, y=hist_df['Close'].rolling(window=200).mean(), mode='lines', name='200d MA', line=dict(color='red', dash='dash')))
+            fig.add_trace(go.Scatter(x=hist_df.index, y=hist_df['Close'].rolling(
+                window=200).mean(), mode='lines', name='200d MA', line=dict(color='red', dash='dash')))
 
         fig.update_layout(
             title=f'Historische Koers en Voortschrijdende Gemiddelden voor {rij_data.get("Naam")}',
@@ -182,5 +185,5 @@ if st.session_state.analyse_data is not None:
                 # We geven de ticker expliciet mee als eerste argument om de cache te garanderen.
                 analyse_tekst = genereer_ai_analyse(rij_data.get('Ticker'),
                                                     rij_data.to_dict(), mijn_profiel, feedback)
-                st.markdown("---")
-                st.markdown(analyse_tekst)
+                st.write_stream("---")
+                st.write_stream(analyse_tekst)
